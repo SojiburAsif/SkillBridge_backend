@@ -101,8 +101,8 @@ const getAlltetutor = async (payload: {
         where: filters,
         include: {
             category: true
-            // ,   
-            // user: true     
+            ,
+            user: true
         }
     })
 

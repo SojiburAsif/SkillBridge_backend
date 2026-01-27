@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from './lib/auth';
 import cors from 'cors';
 import { tutorRouter } from './Module/Tutors/tutor.route';
+import { StudentBookingRouter } from './Module/Booking/booking.route';
 
 
 const app = express();
@@ -19,6 +20,8 @@ app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use(express.json());
 
 app.use("/api", tutorRouter);
+
+app.use("/api", StudentBookingRouter)
 
 app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');
