@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { tutorServices } from "./tutor.service";
-import { string } from "better-auth/*";
+
 
 
 const getAlltetutor = async (req: Request, res: Response) => {
