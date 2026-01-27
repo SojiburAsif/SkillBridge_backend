@@ -5,20 +5,31 @@ import { string } from "better-auth/*";
 
 const getAlltetutor = async (req: Request, res: Response) => {
     try {
-        const { search } = req.query
-        console.log(" value:", search)
+        const { search, categoryId, rating, price } = req.query
+
         const searchString = typeof search === 'string' ? search : undefined
-        const result = await tutorServices.getAlltetutor({ search: searchString });
+        const categoryIdString = typeof categoryId === 'string' ? categoryId : undefined
+        const ratingNumber = rating ? Number(rating) : undefined
+        const priceNumber = price ? Number(price) : undefined
+
+        const result = await tutorServices.getAlltetutor({
+            ...(searchString && { search: searchString }),
+            ...(categoryIdString && { categoryId: categoryIdString }),
+            ...(ratingNumber && { rating: ratingNumber }),
+            ...(priceNumber && { price: priceNumber })
+        });
+
         res.status(200).json({
             success: true,
+            count: result.length,
             data: result
         })
-
     } catch (err: any) {
-        res.status(400)
-        console.log(err);
+        res.status(400).json({ success: false, error: err.message })
+        console.log(err)
     }
 }
+
 
 const createtutor = async (req: Request, res: Response) => {
     try {

@@ -59,12 +59,56 @@ const updateTutorProfile = async (
     return result
 }
 
-const getAlltetutor = async (payload: { search: string | undefined }) => {
+const getAlltetutor = async (payload: {
+    search?: string,
+    categoryId?: string
+}) => {
+    const filters: any = {}
 
-    const result = await prisma.tutorProfile.findMany()
+
+    if (payload.search) {
+        filters.OR = [
+            {
+                bio: {
+                    contains: payload.search,
+                    mode: 'insensitive'
+                }
+            },
+            {
+                experience: {
+                    contains: payload.search,
+                    mode: 'insensitive'
+                }
+            },
+            {
+                rating: {
+                    gte: isNaN(Number(payload.search)) ? undefined : Number(payload.search)
+                }
+            },
+            {
+                price: {
+                    lte: isNaN(Number(payload.search)) ? undefined : Number(payload.search)
+                }
+            }
+        ]
+    }
+
+    if (payload.categoryId) {
+        filters.categoryId = payload.categoryId
+    }
+
+    const result = await prisma.tutorProfile.findMany({
+        where: filters,
+        include: {
+            category: true
+            // ,   
+            // user: true     
+        }
+    })
 
     return result
 }
+
 
 const getTutorProfileById = async (tutorId: string) => {
 
@@ -94,61 +138,3 @@ export const tutorServices = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// serch ar value
-// {
-//         where: {
-//             OR: [
-//                 {
-//                     bio: {
-//                         contains: payload.search as string,
-//                         mode: 'insensitive'
-//                     }
-//                 },
-//                 {
-//                     experience: {
-//                         contains: payload.search as string,
-//                         mode: 'insensitive'
-//                     }
-//                 },
-//                 {
-//                     rating: {
-//                         gte: Number(payload.search)
-//                     }
-//                 },
-//                 {
-//                     price: {
-//                         lte: Number(payload.search)
-//                     }
-//                 }
-//             ]
-//         }
-//     }
