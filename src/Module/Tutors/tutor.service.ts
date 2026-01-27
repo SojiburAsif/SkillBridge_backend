@@ -59,42 +59,96 @@ const updateTutorProfile = async (
     return result
 }
 
-const getTutorProfile = async (payload: { search: string | undefined }) => {
+const getAlltetutor = async (payload: { search: string | undefined }) => {
 
-    const result = await prisma.tutorProfile.findMany({
+    const result = await prisma.tutorProfile.findMany()
+
+    return result
+}
+
+const getTutorProfileById = async (tutorId: string) => {
+
+    const result = await prisma.tutorProfile.findUnique({
         where: {
-            OR: [
-                {
-                    bio: {
-                        contains: payload.search as string,
-                        mode: 'insensitive'
-                    }
-                },
-                {
-                    experience: {
-                        contains: payload.search as string,
-                        mode: 'insensitive'
-                    }
-                },
-                {
-                    rating: {
-                        gte: Number(payload.search)   // যদি search value number হয়
-                    }
-                },
-                {
-                    price: {
-                        lte: Number(payload.search)   // উদাহরণ: search value দিয়ে price filter
-                    }
-                }
-            ]
+            id: tutorId
         }
     })
 
+    return result
+
+
+};
+
+const getCategoriesAll = async () => {
+    const result = await prisma.category.findMany()
     return result
 }
 
 export const tutorServices = {
     createtutor,
     updateTutorProfile,
-    getTutorProfile
+    getAlltetutor,
+    getTutorProfileById,
+    getCategoriesAll
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// serch ar value
+// {
+//         where: {
+//             OR: [
+//                 {
+//                     bio: {
+//                         contains: payload.search as string,
+//                         mode: 'insensitive'
+//                     }
+//                 },
+//                 {
+//                     experience: {
+//                         contains: payload.search as string,
+//                         mode: 'insensitive'
+//                     }
+//                 },
+//                 {
+//                     rating: {
+//                         gte: Number(payload.search)
+//                     }
+//                 },
+//                 {
+//                     price: {
+//                         lte: Number(payload.search)
+//                     }
+//                 }
+//             ]
+//         }
+//     }

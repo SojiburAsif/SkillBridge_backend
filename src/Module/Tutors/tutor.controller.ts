@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { tutorServices } from "./tutor.service";
+import { string } from "better-auth/*";
 
 
 const getAlltetutor = async (req: Request, res: Response) => {
@@ -7,7 +8,7 @@ const getAlltetutor = async (req: Request, res: Response) => {
         const { search } = req.query
         console.log(" value:", search)
         const searchString = typeof search === 'string' ? search : undefined
-        const result = await tutorServices.getTutorProfile({ search: searchString });
+        const result = await tutorServices.getAlltetutor({ search: searchString });
         res.status(200).json({
             success: true,
             data: result
@@ -18,7 +19,6 @@ const getAlltetutor = async (req: Request, res: Response) => {
         console.log(err);
     }
 }
-
 
 const createtutor = async (req: Request, res: Response) => {
     try {
@@ -55,8 +55,50 @@ const updateTutorController = async (req: Request, res: Response) => {
     }
 };
 
+const getTutorProfile = async (req: Request, res: Response) => {
+    try {
+        const { tutorId } = req.params;
+        if (!tutorId) {
+            throw new Error("TutorId is requerd!")
+        }
+        const result = await tutorServices.getTutorProfileById(tutorId as string);
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (err: any) {
+        console.log(err);
+        res.status(400).json({
+            success: false,
+            error: err.message
+        });
+    }
+};
+
+
+const getCategories = async (req: Request, res: Response) => {
+    try {
+        const result = await tutorServices.getCategoriesAll()
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+
+    } catch (err: any) {
+        console.log(err);
+        res.status(400).json({
+            success: false,
+            error: err.message
+        });
+    }
+}
+
+
 export const TutorController = {
     createtutor,
     updateTutorController,
-    getAlltetutor
+    getAlltetutor,
+    getTutorProfile,
+    getCategories
 }

@@ -14,13 +14,14 @@ datasource db {
 }
 
 model TutorProfile {
-  id         String   @id @default(uuid())
-  bio        String   @db.Text
-  price      Decimal  @db.Decimal(10, 2)
-  rating     Float    @default(0)
-  experience String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id         String      @id @default(uuid())
+  bio        String      @db.Text
+  price      Decimal     @db.Decimal(10, 2)
+  rating     Float       @default(0)
+  experience String      @db.Text
+  status     TutorStatus @default(ACTIVE)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   // Relations
   userId String @unique
@@ -28,6 +29,13 @@ model TutorProfile {
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+enum TutorStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  PENDING
 }
 
 model Category {
@@ -77,6 +85,17 @@ model Review {
   tutor   User   @relation("TutorReviews", fields: [tutorId], references: [id])
 }
 
+model StudentProfile {
+  id        String   @id @default(uuid())
+  grade     String? 
+  interests String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
 model User {
   id            String   @id @default(uuid())
   name          String
@@ -93,10 +112,11 @@ model User {
   tutorProfile    TutorProfile?
   sessions        Session[]
   accounts        Account[]
-  bookings        Booking[]     @relation("StudentBookings")
-  tutorBookings   Booking[]     @relation("TutorBookings")
-  reviewsGiven    Review[]      @relation("StudentReviews")
-  reviewsReceived Review[]      @relation("TutorReviews")
+  bookings        Booking[]       @relation("StudentBookings")
+  tutorBookings   Booking[]       @relation("TutorBookings")
+  reviewsGiven    Review[]        @relation("StudentReviews")
+  reviewsReceived Review[]        @relation("TutorReviews")
+  studentProfile  StudentProfile?
 
   @@map("users")
 }

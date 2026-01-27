@@ -18,7 +18,7 @@ app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
 
-app.use("/api/tutor", tutorRouter);
+app.use("/api", tutorRouter);
 
 app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');
