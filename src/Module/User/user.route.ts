@@ -14,4 +14,6 @@ router.get("/admin/users/:id", auth(UserRole.ADMIN), UserController.getSingleUse
 // Admin: update user status
 router.patch("/admin/users/:id", auth(UserRole.ADMIN), UserController.updateUserStatusController);
 
+router.post("/student/profile", auth(UserRole.STUDENT), UserController.StudentProfileCreate);
+
 export const userRouter = router;

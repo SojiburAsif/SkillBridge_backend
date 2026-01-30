@@ -48,8 +48,37 @@ const updateUserStatusController = async (req: Request, res: Response) => {
     }
 };
 
+
+
+const StudentProfileCreate = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                error: "Unauthorized",
+            });
+        }
+
+        const result = await UserServices.createStudentProfile(req.body, user.id as string);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        res.status(400).json({
+            success: false,
+            error: err.message,
+        });
+    }
+};
+
+
 export const UserController = {
     getUser,
     getSingleUserController,
-    updateUserStatusController
+    updateUserStatusController,
+    StudentProfileCreate
 };

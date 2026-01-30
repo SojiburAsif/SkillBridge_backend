@@ -87,6 +87,7 @@ model Review {
 
 model StudentProfile {
   id        String   @id @default(uuid())
+  StudentID Int      @default(autoincrement())
   grade     String?
   interests String?  @db.Text
   createdAt DateTime @default(now())

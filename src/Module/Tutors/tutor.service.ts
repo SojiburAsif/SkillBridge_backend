@@ -114,9 +114,13 @@ const getTutorProfileById = async (tutorId: string) => {
 
     const result = await prisma.tutorProfile.findUnique({
         where: {
-            id: tutorId
-        }
-    })
+            id: tutorId,
+        },
+        include: {
+            category: true,
+            user: true,
+        },
+    });
 
     return result
 

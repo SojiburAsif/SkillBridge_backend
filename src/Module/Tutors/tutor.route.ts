@@ -12,7 +12,7 @@ router.get('/tutor/profile', TutorController.getAlltetutor);
 
 router.get('/categories', TutorController.getCategories)
 
-router.get("/:tutorId", TutorController.getTutorProfile)
+router.get("/tutor/profile/:tutorId", TutorController.getTutorProfile)
 
 router.post('/tutor/profile', auth(UserRole.TUTOR), TutorController.createtutor);
 
