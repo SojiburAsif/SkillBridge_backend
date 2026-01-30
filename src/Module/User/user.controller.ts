@@ -89,6 +89,24 @@ const StudentProfileCreate = async (req: Request, res: Response) => {
         });
     }
 };
+const getAllStudentProfiles = async (req: Request, res: Response) => {
+    try {
+
+
+
+        const result = await UserServices.getAllStudentProfiles();
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        res.status(400).json({
+            success: false,
+            error: err.message,
+        });
+    }
+};
 
 
 export const UserController = {
@@ -96,5 +114,6 @@ export const UserController = {
     getSingleUserController,
     updateUserStatusController,
     StudentProfileCreate,
-    getStudentProfile
+    getStudentProfile,
+    getAllStudentProfiles
 };

@@ -14,6 +14,8 @@ router.get('/categories', TutorController.getCategories)
 
 router.get("/tutor/profile/:tutorId", TutorController.getTutorProfile)
 
+router.post('/categories', auth(UserRole.ADMIN), TutorController.PostCategory);
+
 router.post('/tutor/profile', auth(UserRole.TUTOR), TutorController.createtutor);
 
 router.put('/tutor/profile', auth(UserRole.TUTOR), TutorController.updateTutorController);

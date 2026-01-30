@@ -68,6 +68,15 @@ const getStudentProfile = async (userId: string) => {
     },
   });
 };
+const getAllStudentProfiles = async () => {
+  return await prisma.studentProfile.findMany({
+    include: {
+      user: true,
+    },
+  });
+};
+
+ 
 
 
 export const UserServices = {
@@ -75,5 +84,6 @@ export const UserServices = {
   getSingleUser,
   updateUserStatus,
   createStudentProfile,
-  getStudentProfile
+  getStudentProfile,
+  getAllStudentProfiles
 };

@@ -131,13 +131,27 @@ const getCategoriesAll = async () => {
     const result = await prisma.category.findMany()
     return result
 }
+const creaCategory = async (category: { name: string }) => {
+    if (!category?.name?.trim()) {
+        throw new Error("Category name is required");
+    }
+
+    const created = await prisma.category.upsert({
+        where: { name: category.name.trim() },
+        update: {}, // no changes if exists
+        create: { name: category.name.trim() },
+    });
+
+    return created;
+};
 
 export const tutorServices = {
     createtutor,
     updateTutorProfile,
     getAlltetutor,
     getTutorProfileById,
-    getCategoriesAll
+    getCategoriesAll,
+    creaCategory
 }
 
 

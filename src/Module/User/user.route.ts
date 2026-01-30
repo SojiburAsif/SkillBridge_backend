@@ -8,7 +8,9 @@ const router = express.Router();
 // Admin: get all users
 router.get("/admin/users", auth(UserRole.ADMIN), UserController.getUser);
 
-router.get("/student/profile", auth(UserRole.STUDENT), UserController.getStudentProfile);
+router.get("/student/profile", auth(UserRole.STUDENT ), UserController.getStudentProfile);
+
+router.get("/admin/student/Allprofile", auth(UserRole.ADMIN ), UserController.getAllStudentProfiles);
 
 // Admin: get single user
 router.get("/admin/users/:id", auth(UserRole.ADMIN), UserController.getSingleUserController);

@@ -52,6 +52,39 @@ const createtutor = async (req: Request, res: Response) => {
     }
 }
 
+
+
+
+
+
+export const PostCategory = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const category = req.body; // Expect: { name: 'Math' }
+
+        if (!category || !category.name?.trim()) {
+            return res.status(400).json({ error: "Category name is required" });
+        }
+
+        const result = await tutorServices.creaCategory(category);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        console.error(err);
+        res.status(500).json({ error: err.message || "Failed to create category" });
+    }
+};
+
+
+
 const updateTutorController = async (req: Request, res: Response) => {
     try {
         const user = req.user;
@@ -111,5 +144,6 @@ export const TutorController = {
     updateTutorController,
     getAlltetutor,
     getTutorProfile,
-    getCategories
+    getCategories,
+    PostCategory
 }
