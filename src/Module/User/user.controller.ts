@@ -11,6 +11,21 @@ const getUser = async (req: Request, res: Response) => {
         res.status(400).json({ success: false, error: err.message });
     }
 };
+const getStudentProfile = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                error: "Unauthorized",
+            });
+        }
+        const result = await UserServices.getStudentProfile(user.id as string);
+        res.status(200).json({ success: true, data: result });
+    } catch (err: any) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+};
 
 // Get single user
 const getSingleUserController = async (req: Request, res: Response) => {
@@ -80,5 +95,6 @@ export const UserController = {
     getUser,
     getSingleUserController,
     updateUserStatusController,
-    StudentProfileCreate
+    StudentProfileCreate,
+    getStudentProfile
 };

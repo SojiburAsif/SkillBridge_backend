@@ -60,6 +60,14 @@ const createStudentProfile = async (
   });
 };
 
+const getStudentProfile = async (userId: string) => {
+  return await prisma.studentProfile.findUnique({
+    where: { userId },
+    include: {
+      user: true,
+    },
+  });
+};
 
 
 export const UserServices = {
@@ -67,4 +75,5 @@ export const UserServices = {
   getSingleUser,
   updateUserStatus,
   createStudentProfile,
+  getStudentProfile
 };
