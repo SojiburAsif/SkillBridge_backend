@@ -116,6 +116,7 @@ const getMyTutorBookings = async (userId: string) => {
         }
     });
 };
+
 const updateBookingStatus = async (
     bookingId: string,
     newStatus: BookingStatus,
@@ -123,31 +124,46 @@ const updateBookingStatus = async (
     role: UserRole
 ) => {
 
+    // ✅ Admin: anything allowed
     if (role === UserRole.ADMIN) {
         return await prisma.booking.update({
             where: { id: bookingId },
-            data: { status: newStatus }
+            data: { status: newStatus },
         });
     }
 
-
-    // Tutor confirm
-    if (role === UserRole.TUTOR && newStatus === "COMPLETED") {
+    // ✅ Tutor: COMPLETED or RESCHEDULED
+    if (
+        role === UserRole.TUTOR &&
+        (newStatus === "COMPLETED" || newStatus === "RESCHEDULED")
+    ) {
         return await prisma.booking.update({
-            where: { id: bookingId, tutorId: userId },
-            data: { status: newStatus }
+            where: {
+                id: bookingId,
+                tutorId: userId,
+            },
+            data: { status: newStatus },
         });
     }
 
-    // Student cancel
-    if (role === UserRole.STUDENT && newStatus === "CANCELLED") {
+    // ✅ Student: CANCELLED or ATTENDED
+    if (
+        role === UserRole.STUDENT &&
+        (newStatus === "CANCELLED" || newStatus === "ATTENDED")
+    ) {
         return await prisma.booking.update({
-            where: { id: bookingId, studentId: userId },
-            data: { status: newStatus }
+            where: {
+                id: bookingId,
+                studentId: userId,
+            },
+            data: { status: newStatus },
         });
     }
+
+    // ❌ Everything else
     throw new Error("Unauthorized status change");
 };
+
 
 
 

@@ -72,7 +72,7 @@ model Booking {
   tutorId String
   tutor   User   @relation("TutorBookings", fields: [tutorId], references: [id])
 
-  slotId    String? 
+  slotId    String?
   tutorSlot TutorSlot? @relation(fields: [slotId], references: [id])
 
   review Review?
@@ -82,6 +82,8 @@ enum BookingStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+  ATTENDED
+  RESCHEDULED
 }
 
 model Review {

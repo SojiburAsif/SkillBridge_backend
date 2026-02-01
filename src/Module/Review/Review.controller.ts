@@ -3,7 +3,7 @@ import { ReviewServices } from "./Review.service";
 
 const ReviewPost = async (req: Request, res: Response) => {
     try {
-        const user = req.user; 
+        const user = req.user;
         if (!user) {
             return res.status(400).json({ success: false, error: "Unauthorized" });
         }
@@ -18,7 +18,7 @@ const ReviewPost = async (req: Request, res: Response) => {
             rating,
             comment,
             bookingId,
-            studentId: user.id, 
+            studentId: user.id,
             tutorId,
         });
 
@@ -44,7 +44,46 @@ const GetAllReviews = async (req: Request, res: Response) => {
     }
 };
 
+const GetReviewByBookingId = async (req: Request, res: Response) => {
+    try {
+        const { bookingId } = req.params;
+        const result = await ReviewServices.GetReviewByBookingId(bookingId as string);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        res.status(400).json({
+            success: false,
+            error: err.message,
+        });
+    }
+};
+
+const GetTutorReviews = async (req: Request, res: Response) => {
+    try {
+        const { tutorId } = req.params;
+
+        if (!tutorId) {
+            return res.status(400).json({ success: false, error: "Tutor ID is required" });
+        }
+
+        const result = await ReviewServices.GetReviewByTutorId(tutorId as string);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+};
+
 export const ReviewController = {
     ReviewPost,
     GetAllReviews,
+    GetReviewByBookingId,
+    GetTutorReviews
+
 };

@@ -1,39 +1,85 @@
 import { prisma } from "../../lib/prisma";
 
+
+
 const PostReview = async (data: {
+
     rating: number;
+
     comment: string;
+
     bookingId: string;
+
     studentId: string;
+
     tutorId: string;
+
 }) => {
-    // check tutor exists
-    const tutor = await prisma.user.findUnique({ where: { id: data.tutorId } });
-    if (!tutor) throw new Error("Tutor not found");
 
-    // check student exists
-    const student = await prisma.user.findUnique({ where: { id: data.studentId } });
-    if (!student) throw new Error("Student not found");
+    // 1. Check if review already exists (Schema level-e @unique thakle-o eita kora best practice)
 
-    // check booking exists
-    const booking = await prisma.booking.findUnique({ where: { id: data.bookingId } });
-    if (!booking) throw new Error("Booking not found");
+    const existingReview = await prisma.review.findUnique({
 
-    // create review
-    const review = await prisma.review.create({ data });
+        where: { bookingId: data.bookingId }
 
-    // update tutor average rating
-    const agg = await prisma.review.aggregate({
-        where: { tutorId: data.tutorId },
-        _avg: { rating: true },
     });
 
-    await prisma.tutorProfile.update({
-        where: { userId: data.tutorId },
-        data: { rating: agg._avg.rating ?? 0 },
+
+
+    if (existingReview) {
+
+        throw new Error("You have already reviewed this booking!");
+
+    }
+
+    // 2. Transaction use kora bhalo jate review create o rating update eksathe hoy
+
+    return await prisma.$transaction(async (tx) => {
+
+        // Create review
+
+        const review = await tx.review.create({ data });
+
+        // Update tutor average rating
+
+        const agg = await tx.review.aggregate({
+
+            where: { tutorId: data.tutorId },
+
+            _avg: { rating: true },
+
+        });
+
+        await tx.tutorProfile.update({
+
+            where: { userId: data.tutorId },
+
+            data: { rating: agg._avg.rating ?? 0 },
+
+        });
+
+        return review;
+
     });
 
-    return review;
+};
+
+const GetReviewByBookingId = async (bookingId: string) => {
+
+    return await prisma.review.findUnique({
+
+        where: { bookingId },
+
+        include: {
+
+            student: true,
+
+            tutor: true
+
+        }
+
+    });
+
 };
 
 const AllUserReview = async () => {
@@ -46,7 +92,20 @@ const AllUserReview = async () => {
     });
 };
 
+
+const GetReviewByTutorId = async (tutorId: string) => {
+    return await prisma.review.findMany({
+        where: { tutorId },
+        include: {
+            student: { select: { name: true, email: true } },
+            booking: true,
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+};
 export const ReviewServices = {
     AllUserReview,
     PostReview,
+    GetReviewByBookingId,
+    GetReviewByTutorId
 };
