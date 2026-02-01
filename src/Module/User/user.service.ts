@@ -76,7 +76,41 @@ const getAllStudentProfiles = async () => {
   });
 };
 
- 
+
+
+type StudentProfilePayload = {
+  grade?: string;
+  interests?: string;
+};
+
+
+const studentProfileUpsert = async (
+  payload: StudentProfilePayload,
+  userId: string
+) => {
+  const data: StudentProfilePayload = {};
+
+  if (payload.grade !== undefined) {
+    data.grade = payload.grade;
+  }
+
+  if (payload.interests !== undefined) {
+    data.interests = payload.interests;
+  }
+
+  const result = await prisma.studentProfile.upsert({
+    where: { userId },
+
+    update: data,
+
+    create: {
+      userId,
+      ...data,
+    },
+  });
+
+  return result;
+};
 
 
 export const UserServices = {
@@ -85,5 +119,6 @@ export const UserServices = {
   updateUserStatus,
   createStudentProfile,
   getStudentProfile,
-  getAllStudentProfiles
+  getAllStudentProfiles,
+  studentProfileUpsert
 };

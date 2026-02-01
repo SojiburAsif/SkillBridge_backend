@@ -10,6 +10,8 @@ const router = express.Router();
 
 router.get('/tutor/profile', TutorController.getAlltetutor);
 
+router.get("/my/profile", auth(UserRole.TUTOR), TutorController.getMytetutorProfile);
+
 router.get('/categories', TutorController.getCategories)
 
 router.get("/tutor/profile/:tutorId", TutorController.getTutorProfile)

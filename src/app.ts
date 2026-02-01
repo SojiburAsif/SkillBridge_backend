@@ -7,6 +7,7 @@ import { tutorRouter } from './Module/Tutors/tutor.route';
 import { StudentBookingRouter } from './Module/Booking/booking.route';
 import { userRouter } from './Module/User/user.route';
 import { reviewRouter } from './Module/Review/Review.route';
+import { TutorSlot } from './Module/TutorSlot/tutorSlot.route';
 
 
 const app = express();
@@ -28,6 +29,8 @@ app.use("/api", StudentBookingRouter)
 app.use('/api', userRouter)
 
 app.use('/api', reviewRouter)
+
+app.use('/api', TutorSlot)
 
 app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');

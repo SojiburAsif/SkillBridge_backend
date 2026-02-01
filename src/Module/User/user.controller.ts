@@ -91,9 +91,6 @@ const StudentProfileCreate = async (req: Request, res: Response) => {
 };
 const getAllStudentProfiles = async (req: Request, res: Response) => {
     try {
-
-
-
         const result = await UserServices.getAllStudentProfiles();
 
         res.status(200).json({
@@ -109,11 +106,44 @@ const getAllStudentProfiles = async (req: Request, res: Response) => {
 };
 
 
+
+const studentProfileUpsert = async (req: Request, res: Response) => {
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        const result = await UserServices.studentProfileUpsert(
+            req.body,
+            user.id as string
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Student profile updated successfully",
+            data: result,
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+
 export const UserController = {
     getUser,
     getSingleUserController,
     updateUserStatusController,
     StudentProfileCreate,
     getStudentProfile,
-    getAllStudentProfiles
+    getAllStudentProfiles,
+    studentProfileUpsert
 };

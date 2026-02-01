@@ -10,19 +10,22 @@ import { BookingStatus } from "../../../generated/prisma/enums";
 const createBooking = async (req: Request, res: Response) => {
     try {
         const user = req.user;
-        req.body.studentId = user?.id;
-        const result = await bookingServices.createBooking(req.body)
+        if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-        res.status(200).json({
-            success: true,
-            data: result
-        })
+        const { tutorProfileId, slotId, dateTime, status } = req.body;
+
+        const booking = await bookingServices.createBooking({
+            studentId: user.id,
+            tutorProfileId,
+            slotId,
+            status
+        });
+
+        res.status(200).json({ success: true, data: booking });
     } catch (err: any) {
-        res.status(400).send(err)
-        console.log(err);
+        res.status(400).json({ success: false, error: err.message });
     }
-}
-
+};
 
 const getAllBooking = async (req: Request, res: Response) => {
     try {
@@ -83,21 +86,25 @@ const getIdByBooking = async (req: Request, res: Response) => {
 const getMyBooking = async (req: Request, res: Response) => {
     try {
         const user = req.user;
+
         if (!user) {
-            throw new Error("Unauthorized: user not found");
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
         }
 
         const result = await bookingServices.getMyBooking(user.id);
 
         res.status(200).json({
             success: true,
-            data: result
+            data: result,
         });
     } catch (err: any) {
-        console.log(err);
+        console.error(err);
         res.status(400).json({
             success: false,
-            error: err.message
+            message: err.message,
         });
     }
 };

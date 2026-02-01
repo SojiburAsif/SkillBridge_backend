@@ -8,9 +8,9 @@ const router = express.Router();
 // Admin: get all users
 router.get("/admin/users", auth(UserRole.ADMIN), UserController.getUser);
 
-router.get("/student/profile", auth(UserRole.STUDENT ), UserController.getStudentProfile);
+router.get("/student/profile", auth(UserRole.STUDENT ,UserRole.ADMIN), UserController.getStudentProfile);
 
-router.get("/admin/student/Allprofile", auth(UserRole.ADMIN ), UserController.getAllStudentProfiles);
+router.get("/admin/student/Allprofile", auth(UserRole.ADMIN), UserController.getAllStudentProfiles);
 
 // Admin: get single user
 router.get("/admin/users/:id", auth(UserRole.ADMIN), UserController.getSingleUserController);
@@ -19,6 +19,13 @@ router.get("/admin/users/:id", auth(UserRole.ADMIN), UserController.getSingleUse
 router.patch("/admin/users/:id", auth(UserRole.ADMIN), UserController.updateUserStatusController);
 
 router.post("/student/profile", auth(UserRole.STUDENT), UserController.StudentProfileCreate);
+
+router.put(
+    "/student/profile",
+    auth(UserRole.STUDENT , UserRole.ADMIN),
+    UserController.studentProfileUpsert
+);
+
 
 
 export const userRouter = router;

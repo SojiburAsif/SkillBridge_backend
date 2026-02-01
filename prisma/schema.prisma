@@ -28,7 +28,21 @@ model TutorProfile {
   user   User   @relation(fields: [userId], references: [id])
 
   categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  tutorSlots TutorSlot[]
+}
+
+model TutorSlot {
+  id        String       @id @default(uuid())
+  tutorId   String
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id])
+  date      DateTime
+  startTime DateTime
+  endTime   DateTime
+  isBooked  Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  bookings  Booking[]
 }
 
 enum TutorStatus {
@@ -52,12 +66,14 @@ model Booking {
   status    BookingStatus @default(CONFIRMED)
   createdAt DateTime      @default(now())
 
-  // Relations
   studentId String
   student   User   @relation("StudentBookings", fields: [studentId], references: [id])
 
   tutorId String
   tutor   User   @relation("TutorBookings", fields: [tutorId], references: [id])
+
+  slotId    String? 
+  tutorSlot TutorSlot? @relation(fields: [slotId], references: [id])
 
   review Review?
 }
