@@ -36,4 +36,4 @@ app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');
 });
 
-export default app
+export default app;
