@@ -5,7 +5,7 @@ import { prisma } from "./prisma";
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql", 
+        provider: "postgresql",
     }),
     trustedOrigins: [process.env.APP_URL!, "https://skill-bridge-fontend-five.vercel.app"],
     user: {
@@ -30,7 +30,7 @@ export const auth = betterAuth({
         autoSignIn: false,
         requireEmailVerification: false,
     },
-  
+
     socialProviders: {
         google: {
             accessType: "offline",
@@ -39,5 +39,27 @@ export const auth = betterAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         },
     },
+    advanced: {
+        defaultCookieAttributes: {
+            sameSite: "none",
+            secure: true,
+            httpOnly: true,
+            //extra
+            path: "/",
+        },
+        trustProxy: true,
+        cookies: {
+            state: {
+                attributes: {
+                    sameSite: "none",
+                    secure: true,
+                    // extra
+                    path: "/",
+                },
+            },
+        },
+    },
+
+
 
 });
