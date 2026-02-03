@@ -70,6 +70,7 @@ export const auth = betterAuth({
                 },
             },
         },
+        disableCSRFCheck: true
     },
 
 
