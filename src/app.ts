@@ -13,10 +13,9 @@ import { TutorSlot } from './Module/TutorSlot/tutorSlot.route';
 const app = express();
 
 app.use(cors({
-    origin: process.env.APP_URL || 'http://localhost:3000',
+    origin: [process.env.APP_URL as string , 'http://localhost:3000', "https://skill-bridge-fontend-five.vercel.app"],
     credentials: true
 }))
-
 
 app.all('/api/auth/*splat', toNodeHandler(auth));
 
