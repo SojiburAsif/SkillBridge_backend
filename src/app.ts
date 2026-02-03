@@ -12,6 +12,8 @@ import { TutorSlot } from './Module/TutorSlot/tutorSlot.route';
 
 const app = express();
 
+app.set("trust proxy", true)
+
 const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app"]
 
 app.use(
