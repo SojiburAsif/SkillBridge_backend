@@ -36,7 +36,7 @@ const updateUserStatus = async (userId: string, newStatus: $Enums.UserStatus) =>
   });
 };
 
-// Create student profile (একজন user একবারই profile বানাতে পারবে)
+
 const createStudentProfile = async (
   data: Omit<StudentProfile, "id" | "createdAt" | "updatedAt" | "userId">,
   userId: string

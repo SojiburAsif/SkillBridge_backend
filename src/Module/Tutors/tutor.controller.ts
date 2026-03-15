@@ -45,7 +45,7 @@ const getAlltetutor = async (req: Request, res: Response) => {
 
 const getMytetutorProfile = async (req: Request, res: Response) => {
     try {
-        const user = req.user; // auth middleware থেকে
+        const user = req.user; 
 
         if (!user || !user.id) {
             return res.status(401).json({
@@ -54,7 +54,7 @@ const getMytetutorProfile = async (req: Request, res: Response) => {
             });
         }
 
-        const userId = user.id; // 👈 এখানেই magic
+        const userId = user.id; 
 
         const profile = await tutorServices.getMyProfiletetutor({ userId });
 

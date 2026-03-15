@@ -8,13 +8,15 @@ import { StudentBookingRouter } from './Module/Booking/booking.route';
 import { userRouter } from './Module/User/user.route';
 import { reviewRouter } from './Module/Review/Review.route';
 import { TutorSlot } from './Module/TutorSlot/tutorSlot.route';
+import { errorHandler } from './middleware/error';
+import { notFound } from './middleware/notFound';
 
 
 const app = express();
 
 app.set("trust proxy", true)
 
-const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app"]
+const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app" , 'http://localhost:3000', "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
 
 app.use(
     cors({
@@ -64,5 +66,8 @@ app.use('/api', TutorSlot)
 app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;
