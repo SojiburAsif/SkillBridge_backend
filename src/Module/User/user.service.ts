@@ -76,6 +76,80 @@ const getAllStudentProfiles = async () => {
   });
 };
 
+const getDashboardAnalytics = async () => {
+  const [
+    totalUsers,
+    totalStudents,
+    totalTutors,
+    totalAdmins,
+    activeUsers,
+    inactiveUsers,
+    bandUsers,
+    totalStudentProfiles,
+    totalTutorProfiles,
+    totalBookings,
+    completedBookings,
+    cancelledBookings,
+    totalReviews,
+    totalCategories,
+    totalTutorSlots,
+    bookedTutorSlots,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { role: "STUDENT" } }),
+    prisma.user.count({ where: { role: "TUTOR" } }),
+    prisma.user.count({ where: { role: "ADMIN" } }),
+    prisma.user.count({ where: { status: "ACTIVE" } }),
+    prisma.user.count({ where: { status: "INACTIVE" } }),
+    prisma.user.count({ where: { status: "BAND" } }),
+    prisma.studentProfile.count(),
+    prisma.tutorProfile.count(),
+    prisma.booking.count(),
+    prisma.booking.count({ where: { status: "COMPLETED" } }),
+    prisma.booking.count({ where: { status: "CANCELLED" } }),
+    prisma.review.count(),
+    prisma.category.count(),
+    prisma.tutorSlot.count(),
+    prisma.tutorSlot.count({ where: { isBooked: true } }),
+  ]);
+
+  return {
+    users: {
+      total: totalUsers,
+      byRole: {
+        students: totalStudents,
+        tutors: totalTutors,
+        admins: totalAdmins,
+      },
+      byStatus: {
+        active: activeUsers,
+        inactive: inactiveUsers,
+        band: bandUsers,
+      },
+    },
+    profiles: {
+      students: totalStudentProfiles,
+      tutors: totalTutorProfiles,
+    },
+    bookings: {
+      total: totalBookings,
+      completed: completedBookings,
+      cancelled: cancelledBookings,
+    },
+    reviews: {
+      total: totalReviews,
+    },
+    categories: {
+      total: totalCategories,
+    },
+    tutorSlots: {
+      total: totalTutorSlots,
+      booked: bookedTutorSlots,
+      available: totalTutorSlots - bookedTutorSlots,
+    },
+  };
+};
+
 
 
 type StudentProfilePayload = {
@@ -120,5 +194,6 @@ export const UserServices = {
   createStudentProfile,
   getStudentProfile,
   getAllStudentProfiles,
-  studentProfileUpsert
+  studentProfileUpsert,
+  getDashboardAnalytics
 };

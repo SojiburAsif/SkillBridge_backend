@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { auth as BetterAuth } from "../lib/auth";
+import { prisma } from "../lib/prisma";
 
 
 declare global {
@@ -41,15 +42,30 @@ export const auth = (...roles: UserRole[]) => {
             // }
 
 
+            let resolvedRole = ((session.user as any).role as string | undefined)?.trim().toUpperCase();
+
+            if (!resolvedRole) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: session.user.id },
+                    select: { role: true }
+                });
+                resolvedRole = dbUser?.role;
+            }
+
             req.user = {
                 id: session.user.id,
                 email: session.user.email,
                 name: session.user.name,
-                role: session.user.role as string,
+                role: resolvedRole ?? UserRole.STUDENT,
                 emailVerified: session.user.emailVerified
             }
 
-            if (roles.length && !roles.includes(req.user?.role as UserRole)) {
+            const normalizedAllowedRoles = roles.map((role) => role.toUpperCase());
+
+            if (
+                normalizedAllowedRoles.length &&
+                !normalizedAllowedRoles.includes((req.user?.role ?? "").toUpperCase())
+            ) {
                 return Res.status(403).json({
                     success: false,
                     error: "FORBIDDEN",

@@ -18,6 +18,8 @@ router.get("/admin/users/:id", auth(UserRole.ADMIN), UserController.getSingleUse
 // Admin: update user status
 router.patch("/admin/users/:id", auth(UserRole.ADMIN), UserController.updateUserStatusController);
 
+router.get("/admin/dashboard/analytics", auth(UserRole.ADMIN), UserController.getDashboardAnalytics);
+
 router.post("/student/profile", auth(UserRole.STUDENT), UserController.StudentProfileCreate);
 
 router.put(

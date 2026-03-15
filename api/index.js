@@ -113,13 +113,12 @@ var auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql"
   }),
-  trustedOrigins: [process.env.APP_URL],
+  trustedOrigins: [process.env.APP_URL, "https://skill-bridge-fontend-five.vercel.app"],
   user: {
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: "STUDENT",
-        required: false
+        defaultValue: "STUDENT"
       },
       phone: {
         type: "string",
@@ -137,40 +136,6 @@ var auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: false
   },
-  // emailVerification: {
-  //     sendOnSignUp: true,
-  //     autoSignInAfterVerification: true,
-  //     sendVerificationEmail: async ({ user, url, token }, request) => {
-  //         try {
-  //             const verification_url = `${process.env.APP_URL}/verify-email?token=${token}`;
-  //             const info = await transporter.sendMail({
-  //                 from: '"Sojibur Asif" <maddison53@ethereal.email>',
-  //                 to: user.email,
-  //                 subject: "Verify Your Email ✔",
-  //                 text: `Hi ${user.name || "User"}, please verify your email by clicking the link: ${verification_url}`,
-  //                 html: `
-  //     <div style="font-family: Arial, sans-serif; color: #333;">
-  //         <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #f9f9f9;">
-  //             <h2 style="color: #4CAF50;">Welcome to Our Platform, ${user.name || "User"}!</h2>
-  //             <p>Thank you for signing up. To get started, please verify your email address by clicking the button below:</p>
-  //             <a href="${verification_url}" 
-  //                style="display: inline-block; padding: 12px 24px; margin: 20px 0; font-size: 16px; color: #fff; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">
-  //                Verify Email
-  //             </a>
-  //             <p>If the button doesn’t work, copy and paste the following link into your browser:</p>
-  //             <p style="word-break: break-all;"><a href="${verification_url}">${verification_url}</a></p>
-  //             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-  //             <p style="font-size: 12px; color: #888;">If you did not create an account, no further action is required.</p>
-  //         </div>
-  //     </div>
-  //     `
-  //             });
-  //             console.log(info);
-  //         } catch (err: any) {
-  //             console.log(err);
-  //         }
-  //     }
-  // },
   socialProviders: {
     google: {
       accessType: "offline",
@@ -178,6 +143,38 @@ var auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET
     }
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60
+      // 5 minutes
+    }
+  },
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: false
+    },
+    cookiePrefix: "better-auth",
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+      //extra
+      path: "/"
+    },
+    trustProxy: true,
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+          // extra
+          path: "/"
+        }
+      }
+    },
+    disableCSRFCheck: true
   }
 });
 
@@ -199,14 +196,23 @@ var auth2 = (...roles) => {
           message: "You are not authorized to access this resource"
         });
       }
+      let resolvedRole = session.user.role?.trim().toUpperCase();
+      if (!resolvedRole) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { role: true }
+        });
+        resolvedRole = dbUser?.role;
+      }
       req.user = {
         id: session.user.id,
         email: session.user.email,
         name: session.user.name,
-        role: session.user.role,
+        role: resolvedRole ?? "STUDENT" /* STUDENT */,
         emailVerified: session.user.emailVerified
       };
-      if (roles.length && !roles.includes(req.user?.role)) {
+      const normalizedAllowedRoles = roles.map((role) => role.toUpperCase());
+      if (normalizedAllowedRoles.length && !normalizedAllowedRoles.includes((req.user?.role ?? "").toUpperCase())) {
         return Res.status(403).json({
           success: false,
           error: "FORBIDDEN",
@@ -798,6 +804,78 @@ var getAllStudentProfiles = async () => {
     }
   });
 };
+var getDashboardAnalytics = async () => {
+  const [
+    totalUsers,
+    totalStudents,
+    totalTutors,
+    totalAdmins,
+    activeUsers,
+    inactiveUsers,
+    bandUsers,
+    totalStudentProfiles,
+    totalTutorProfiles,
+    totalBookings,
+    completedBookings,
+    cancelledBookings,
+    totalReviews,
+    totalCategories,
+    totalTutorSlots,
+    bookedTutorSlots
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { role: "STUDENT" } }),
+    prisma.user.count({ where: { role: "TUTOR" } }),
+    prisma.user.count({ where: { role: "ADMIN" } }),
+    prisma.user.count({ where: { status: "ACTIVE" } }),
+    prisma.user.count({ where: { status: "INACTIVE" } }),
+    prisma.user.count({ where: { status: "BAND" } }),
+    prisma.studentProfile.count(),
+    prisma.tutorProfile.count(),
+    prisma.booking.count(),
+    prisma.booking.count({ where: { status: "COMPLETED" } }),
+    prisma.booking.count({ where: { status: "CANCELLED" } }),
+    prisma.review.count(),
+    prisma.category.count(),
+    prisma.tutorSlot.count(),
+    prisma.tutorSlot.count({ where: { isBooked: true } })
+  ]);
+  return {
+    users: {
+      total: totalUsers,
+      byRole: {
+        students: totalStudents,
+        tutors: totalTutors,
+        admins: totalAdmins
+      },
+      byStatus: {
+        active: activeUsers,
+        inactive: inactiveUsers,
+        band: bandUsers
+      }
+    },
+    profiles: {
+      students: totalStudentProfiles,
+      tutors: totalTutorProfiles
+    },
+    bookings: {
+      total: totalBookings,
+      completed: completedBookings,
+      cancelled: cancelledBookings
+    },
+    reviews: {
+      total: totalReviews
+    },
+    categories: {
+      total: totalCategories
+    },
+    tutorSlots: {
+      total: totalTutorSlots,
+      booked: bookedTutorSlots,
+      available: totalTutorSlots - bookedTutorSlots
+    }
+  };
+};
 var studentProfileUpsert = async (payload, userId) => {
   const data = {};
   if (payload.grade !== void 0) {
@@ -823,7 +901,8 @@ var UserServices = {
   createStudentProfile,
   getStudentProfile,
   getAllStudentProfiles,
-  studentProfileUpsert
+  studentProfileUpsert,
+  getDashboardAnalytics
 };
 
 // src/Module/User/user.controller.ts
@@ -913,6 +992,20 @@ var getAllStudentProfiles2 = async (req, res) => {
     });
   }
 };
+var getDashboardAnalytics2 = async (req, res) => {
+  try {
+    const result = await UserServices.getDashboardAnalytics();
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+};
 var studentProfileUpsert2 = async (req, res) => {
   try {
     const user = req.user;
@@ -945,7 +1038,8 @@ var UserController = {
   StudentProfileCreate,
   getStudentProfile: getStudentProfile2,
   getAllStudentProfiles: getAllStudentProfiles2,
-  studentProfileUpsert: studentProfileUpsert2
+  studentProfileUpsert: studentProfileUpsert2,
+  getDashboardAnalytics: getDashboardAnalytics2
 };
 
 // src/Module/User/user.route.ts
@@ -955,6 +1049,7 @@ router3.get("/student/profile", auth2("STUDENT" /* STUDENT */, "ADMIN" /* ADMIN 
 router3.get("/admin/student/Allprofile", auth2("ADMIN" /* ADMIN */), UserController.getAllStudentProfiles);
 router3.get("/admin/users/:id", auth2("ADMIN" /* ADMIN */), UserController.getSingleUserController);
 router3.patch("/admin/users/:id", auth2("ADMIN" /* ADMIN */), UserController.updateUserStatusController);
+router3.get("/admin/dashboard/analytics", auth2("ADMIN" /* ADMIN */), UserController.getDashboardAnalytics);
 router3.post("/student/profile", auth2("STUDENT" /* STUDENT */), UserController.StudentProfileCreate);
 router3.put(
   "/student/profile",
@@ -1218,12 +1313,58 @@ router5.delete("/tutor/profileSlot/:slotId", tutorSlotController.deleteSlotContr
 router5.get("/tutor/profileSlot/:tutorId", tutorSlotController.getSlotsByTutor);
 var TutorSlot = router5;
 
+// src/middleware/error.ts
+var errorHandler = (err, _req, res, _next) => {
+  const isJsonParseError = err instanceof SyntaxError && typeof err.message === "string" && (err.message.includes("JSON") || err.message.includes("control character"));
+  if (isJsonParseError) {
+    return res.status(400).json({
+      success: false,
+      error: "BAD_REQUEST",
+      message: "Invalid JSON body. Escape special characters in strings (example: use \\n or \\t)."
+    });
+  }
+  const statusCode = err.statusCode ?? 500;
+  const code = err.code ?? (statusCode >= 500 ? "INTERNAL_SERVER_ERROR" : "BAD_REQUEST");
+  const message = err.message || "Something went wrong";
+  res.status(statusCode).json({
+    success: false,
+    error: code,
+    message
+  });
+};
+
+// src/middleware/notFound.ts
+var notFound = (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "NOT_FOUND",
+    message: "Router Not Found",
+    path: req.originalUrl,
+    method: req.method
+  });
+};
+
 // src/app.ts
 var app = express5();
-app.use(cors({
-  origin: process.env.APP_URL || "http://localhost:3000",
-  credentials: true
-}));
+app.set("trust proxy", true);
+var allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app", "http://localhost:3000", "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["Set-Cookie"]
+  })
+);
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express5.json());
 app.use("/api", tutorRouter);
@@ -1234,6 +1375,8 @@ app.use("/api", TutorSlot);
 app.get("/", (req, res) => {
   res.send("SkillBridge server is up and running");
 });
+app.use(notFound);
+app.use(errorHandler);
 var app_default = app;
 
 // src/index.ts

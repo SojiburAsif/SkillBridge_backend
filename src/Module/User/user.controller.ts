@@ -105,6 +105,22 @@ const getAllStudentProfiles = async (req: Request, res: Response) => {
     }
 };
 
+const getDashboardAnalytics = async (req: Request, res: Response) => {
+    try {
+        const result = await UserServices.getDashboardAnalytics();
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (err: any) {
+        res.status(400).json({
+            success: false,
+            error: err.message,
+        });
+    }
+};
+
 
 
 const studentProfileUpsert = async (req: Request, res: Response) => {
@@ -145,5 +161,6 @@ export const UserController = {
     StudentProfileCreate,
     getStudentProfile,
     getAllStudentProfiles,
-    studentProfileUpsert
+    studentProfileUpsert,
+    getDashboardAnalytics
 };
