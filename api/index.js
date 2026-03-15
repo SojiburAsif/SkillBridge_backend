@@ -816,8 +816,11 @@ var getDashboardAnalytics = async () => {
     totalStudentProfiles,
     totalTutorProfiles,
     totalBookings,
+    confirmedBookings,
     completedBookings,
     cancelledBookings,
+    attendedBookings,
+    rescheduledBookings,
     totalReviews,
     totalCategories,
     totalTutorSlots,
@@ -833,13 +836,28 @@ var getDashboardAnalytics = async () => {
     prisma.studentProfile.count(),
     prisma.tutorProfile.count(),
     prisma.booking.count(),
+    prisma.booking.count({ where: { status: "CONFIRMED" } }),
     prisma.booking.count({ where: { status: "COMPLETED" } }),
     prisma.booking.count({ where: { status: "CANCELLED" } }),
+    prisma.booking.count({ where: { status: "ATTENDED" } }),
+    prisma.booking.count({ where: { status: "RESCHEDULED" } }),
     prisma.review.count(),
     prisma.category.count(),
     prisma.tutorSlot.count(),
     prisma.tutorSlot.count({ where: { isBooked: true } })
   ]);
+  const userRoleSplit = [
+    { role: "STUDENT", value: totalStudents },
+    { role: "TUTOR", value: totalTutors },
+    { role: "ADMIN", value: totalAdmins }
+  ];
+  const bookingStatusSplit = [
+    { status: "CONFIRMED", value: confirmedBookings },
+    { status: "COMPLETED", value: completedBookings },
+    { status: "CANCELLED", value: cancelledBookings },
+    { status: "ATTENDED", value: attendedBookings },
+    { status: "RESCHEDULED", value: rescheduledBookings }
+  ];
   return {
     users: {
       total: totalUsers,
@@ -860,8 +878,12 @@ var getDashboardAnalytics = async () => {
     },
     bookings: {
       total: totalBookings,
+      confirmed: confirmedBookings,
       completed: completedBookings,
-      cancelled: cancelledBookings
+      cancelled: cancelledBookings,
+      attended: attendedBookings,
+      rescheduled: rescheduledBookings,
+      byStatus: bookingStatusSplit
     },
     reviews: {
       total: totalReviews
@@ -873,6 +895,10 @@ var getDashboardAnalytics = async () => {
       total: totalTutorSlots,
       booked: bookedTutorSlots,
       available: totalTutorSlots - bookedTutorSlots
+    },
+    charts: {
+      userRoleSplit,
+      bookingStatusSplit
     }
   };
 };
