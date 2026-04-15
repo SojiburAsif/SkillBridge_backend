@@ -22,11 +22,11 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: "http://localhost:8000/api",
+                url: "https://skillbridgebackend.vercel.app/api",
             },
         ],
     },
-    apis: ["./src/app/Module/**/*.ts"], 
+    apis: ["./src/app/Module/**/*.ts"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -34,19 +34,18 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.set("trust proxy", true)
 
-const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app" , 'http://localhost:3000', "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
+const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app", 'http://localhost:3000', "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
 
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (mobile apps, Postman, etc.) or "null" origin (local dev)
-            if (!origin || origin === 'null') return callback(null, true);
+            if (!origin || origin === "null") return callback(null, true);
 
-            // Check if origin is in allowedOrigins or matches Vercel preview pattern
             const isAllowed =
                 allowedOrigins.includes(origin) ||
                 /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) ||
-                /^https:\/\/.*\.vercel\.app$/.test(origin); // Any Vercel deployment
+                /^https:\/\/.*\.vercel\.app$/.test(origin) ||
+                origin.includes("sslcommerz.com"); 
 
             if (isAllowed) {
                 callback(null, true);
@@ -58,7 +57,7 @@ app.use(
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
         exposedHeaders: ["Set-Cookie"],
-    }),
+    })
 );
 
 
