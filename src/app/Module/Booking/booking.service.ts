@@ -39,14 +39,17 @@ const initPaymentForExistingBooking = async (bookingId: string, studentId: strin
         total_amount: Number(payAmount),
         currency: 'BDT',
         tran_id: transactionId,
-        success_url: `http://localhost:5000/api/bookings/payment/success/${transactionId}`,
-        fail_url: `http://localhost:5000/api/bookings/payment/fail/${transactionId}`,
-        cancel_url: `http://localhost:5000/api/bookings/payment/cancel/${transactionId}`,
-        ipn_url: `http://localhost:5000/api/bookings/payment/ipn`,
+
+        success_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/success/${transactionId}`,
+        fail_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/fail/${transactionId}`,
+        cancel_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/cancel/${transactionId}`,
+        ipn_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/ipn`,
+
         shipping_method: 'No',
         product_name: 'Tutor Session',
         product_category: 'Education',
         product_profile: 'general',
+
         cus_name: booking.student?.name ?? 'Student',
         cus_email: booking.student?.email ?? 'student@mentorflow.com',
         cus_add1: 'Dhaka',
@@ -54,6 +57,7 @@ const initPaymentForExistingBooking = async (bookingId: string, studentId: strin
         cus_country: 'Bangladesh',
         cus_phone: booking.student?.phone ?? '01711111111'
     };
+
 
     const apiResponse = await sslcz.init(data);
     if (apiResponse?.GatewayPageURL) {
@@ -143,7 +147,7 @@ const createBooking = async (payload: {
     const data = {
         total_amount: Number(finalAmount),
         currency: 'BDT',
-        tran_id: transactionId, 
+        tran_id: transactionId,
         success_url: `http://localhost:5000/api/bookings/payment/success/${transactionId}`,
         fail_url: `http://localhost:5000/api/bookings/payment/fail/${transactionId}`,
         cancel_url: `http://localhost:5000/api/bookings/payment/cancel/${transactionId}`,
@@ -153,7 +157,7 @@ const createBooking = async (payload: {
         product_category: 'Education',
         product_profile: 'general',
         cus_name: 'Student',
-        cus_email: 'student@mentorflow.com', 
+        cus_email: 'student@mentorflow.com',
         cus_add1: 'Dhaka',
         cus_city: 'Dhaka',
         cus_country: 'Bangladesh',
@@ -227,7 +231,7 @@ const handlePaymentFailOrCancel = async (transactionId: string) => {
                 data: { isBooked: false },
             });
         }
-        
+
         await tx.booking.update({
             where: { id: booking.id },
             data: {
@@ -246,7 +250,7 @@ const updateBookingStatus = async (
 ) => {
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) throw new Error("Booking not found");
-    
+
     let updatedBooking;
 
     if (newStatus === "CONFIRMED" && booking.paymentStatus !== PaymentStatus.PAID) {
@@ -262,7 +266,7 @@ const updateBookingStatus = async (
     }
     else if (role === UserRole.TUTOR && (newStatus === "COMPLETED" || newStatus === "RESCHEDULED" || newStatus === "CONFIRMED")) {
         if (booking.tutorId !== userId) throw new Error("Unauthorized");
-        
+
         updatedBooking = await prisma.booking.update({
             where: { id: bookingId },
             data: { status: newStatus },
@@ -292,7 +296,7 @@ const updateBookingStatus = async (
             if (booking.paymentStatus === "PAID") {
                 updatedBooking = await prisma.booking.update({
                     where: { id: bookingId },
-                    data: { 
+                    data: {
                         status: newStatus,
                         paymentStatus: PaymentStatus.REFUND_REQUESTED
                     },
@@ -350,8 +354,8 @@ const handleMutualConfirmation = async (bookingId: string, userId: string, role:
         throw new Error("Cannot confirm mutually because payment has failed or is pending.");
     }
 
-    let confirmationData = typeof booking.mutualConfirmation === 'object' && booking.mutualConfirmation !== null 
-        ? (booking.mutualConfirmation as any) 
+    let confirmationData = typeof booking.mutualConfirmation === 'object' && booking.mutualConfirmation !== null
+        ? (booking.mutualConfirmation as any)
         : { tutorConfirmed: false, studentConfirmed: false };
 
     if (role === UserRole.TUTOR && booking.tutorId === userId) {
@@ -534,7 +538,7 @@ const getSingleBooking = async (bookingId: string, role: UserRole, userId: strin
 };
 
 const getMyBooking = async (userId: string) => prisma.booking.findMany({ where: { studentId: userId }, orderBy: { dateTime: "desc" }, include: { tutor: true } });
-const getMyTutorBookings = async (userId: string) => prisma.booking.findMany({ where: { tutorId: userId }, orderBy: { dateTime: "desc" }, include: { student: true }});
+const getMyTutorBookings = async (userId: string) => prisma.booking.findMany({ where: { tutorId: userId }, orderBy: { dateTime: "desc" }, include: { student: true } });
 
 const adminDeleteBooking = async (bookingId: string) => {
     const booking = await prisma.booking.findUnique({
@@ -571,7 +575,7 @@ const adminDeleteBooking = async (bookingId: string) => {
 
 const getCategorizedBookings = async (userId: string, role: string) => {
     let whereCondition: any = {};
-    
+
     if (role === UserRole.STUDENT) {
         whereCondition = { studentId: userId };
     } else if (role === UserRole.TUTOR) {
