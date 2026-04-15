@@ -1,18 +1,36 @@
 import express from 'express';
 
 import { toNodeHandler } from "better-auth/node";
-import { auth } from './lib/auth';
+import { auth } from './app/lib/auth';
 import cors from 'cors';
-import { tutorRouter } from './Module/Tutors/tutor.route';
-import { StudentBookingRouter } from './Module/Booking/booking.route';
-import { userRouter } from './Module/User/user.route';
-import { reviewRouter } from './Module/Review/Review.route';
-import { TutorSlot } from './Module/TutorSlot/tutorSlot.route';
-import { errorHandler } from './middleware/error';
-import { notFound } from './middleware/notFound';
+import router from './app/routes';
+import { errorHandler } from './app/middleware/error';
+import { notFound } from './app/middleware/notFound';
 
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
 
 const app = express();
+
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "MentorFlow API",
+            version: "1.0.0",
+            description: "API Documentation for MentorFlow Back-end",
+        },
+        servers: [
+            {
+                url: "http://localhost:8000/api",
+            },
+        ],
+    },
+    apis: ["./src/app/Module/**/*.ts"], 
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.set("trust proxy", true)
 
@@ -21,8 +39,8 @@ const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app" , 'http:/
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (mobile apps, Postman, etc.)
-            if (!origin) return callback(null, true);
+            // Allow requests with no origin (mobile apps, Postman, etc.) or "null" origin (local dev)
+            if (!origin || origin === 'null') return callback(null, true);
 
             // Check if origin is in allowedOrigins or matches Vercel preview pattern
             const isAllowed =
@@ -49,19 +67,9 @@ app.use(
 //     credentials: true
 // }))
 
-app.all('/api/auth/*splat', toNodeHandler(auth));
-
 app.use(express.json());
 
-app.use("/api", tutorRouter);
-
-app.use("/api", StudentBookingRouter)
-
-app.use('/api', userRouter)
-
-app.use('/api', reviewRouter)
-
-app.use('/api', TutorSlot)
+app.use("/api", router);
 
 app.get('/', (req, res) => {
     res.send('SkillBridge server is up and running');

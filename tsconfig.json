@@ -40,7 +40,7 @@
   },
   "include": [
     "src/**/*"
-, "prisma/seedCategories.ts"  ],
+  ],
   "exclude": [
     "node_modules",
     "dist",

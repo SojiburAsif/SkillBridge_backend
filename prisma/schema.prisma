@@ -18,6 +18,9 @@ model TutorProfile {
   bio        String      @db.Text
   price      Decimal     @db.Decimal(10, 2)
   rating     Float       @default(0)
+  totalReviews Int       @default(0)
+  gender     String?
+  institution String?
   experience String      @db.Text
   status     TutorStatus @default(ACTIVE)
   createdAt  DateTime    @default(now())
@@ -25,11 +28,27 @@ model TutorProfile {
 
   // Relations
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   categoryId String?
   category   Category?   @relation(fields: [categoryId], references: [id])
+  categories TutorProfileCategory[]
   tutorSlots TutorSlot[]
+  wishlistedBy Wishlist[]
+}
+
+model TutorProfileCategory {
+  id             String       @id @default(uuid())
+  tutorProfileId String
+  categoryId     String
+  order          Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([tutorProfileId, categoryId])
+  @@index([categoryId])
 }
 
 model TutorSlot {
@@ -54,17 +73,31 @@ enum TutorStatus {
 
 model Category {
   id        String         @id @default(uuid())
-  name      String         @unique
+  name      String
+  icon      String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @default(now())
   tutors    TutorProfile[]
+  tutorProfiles TutorProfileCategory[]
 }
 
 model Booking {
   id        String        @id @default(uuid())
   dateTime  DateTime
-  status    BookingStatus @default(CONFIRMED)
+  status    BookingStatus @default(AWAITING_PAYMENT)
+  paymentStatus PaymentStatus @default(PENDING)
+  originalAmount Float?
+  discountAmount Float?
+  paidAmount     Float?
+  transactionId String?    @unique
+  videoCallId   String?    @unique
+  isAutoCompleted Boolean  @default(false)
+  mutualConfirmation Json? @default("{\"tutorConfirmed\": false, \"studentConfirmed\": false}")
+  videoSession Json?     @default("{\"sessionUrl\": null, \"isActive\": false, \"expiresAt\": null}")
   createdAt DateTime      @default(now())
+
+  couponId  String?
+  coupon    Coupon? @relation(fields: [couponId], references: [id])
 
   studentId String
   student   User   @relation("StudentBookings", fields: [studentId], references: [id])
@@ -79,6 +112,8 @@ model Booking {
 }
 
 enum BookingStatus {
+  AWAITING_PAYMENT
+  PENDING_CONFIRMATION
   CONFIRMED
   CANCELLED
   COMPLETED
@@ -86,10 +121,19 @@ enum BookingStatus {
   RESCHEDULED
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUND_REQUESTED
+  REFUND_PROCESSED
+  FAILED
+}
+
 model Review {
   id        String   @id @default(uuid())
   rating    Int
   comment   String   @db.Text
+  isVerified Boolean @default(true)
   createdAt DateTime @default(now())
 
   // Relations
@@ -104,15 +148,17 @@ model Review {
 }
 
 model StudentProfile {
-  id        String   @id @default(uuid())
-  StudentID Int      @default(autoincrement())
-  grade     String?
-  interests String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  StudentID   Int      @default(autoincrement())
+  grade       String?
+  institution String?  
+  gender      String?
+  interests   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -131,10 +177,14 @@ model User {
   tutorProfile    TutorProfile?
   sessions        Session[]
   accounts        Account[]
+  notifications   Notification[]
   bookings        Booking[]       @relation("StudentBookings")
   tutorBookings   Booking[]       @relation("TutorBookings")
   reviewsGiven    Review[]        @relation("StudentReviews")
   reviewsReceived Review[]        @relation("TutorReviews")
+  wishlistItems   Wishlist[]      @relation("StudentWishlist")
+  messagesSent    Message[]       @relation("SentMessages")
+  messagesRecv    Message[]       @relation("ReceivedMessages")
   studentProfile  StudentProfile?
 
   @@map("users")
@@ -198,4 +248,55 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  message       String
+  isRead        Boolean  @default(false)
+  type          String   @default("INFO")
+  transactionId String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+model Wishlist {
+  id             String   @id @default(uuid())
+  studentId      String
+  student        User     @relation("StudentWishlist", fields: [studentId], references: [id])
+  tutorProfileId String
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@unique([studentId, tutorProfileId])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  text       String   @db.Text
+  createdAt  DateTime @default(now())
+  readAt     DateTime?
+}
+
+
+model Coupon {
+  id                 String   @id @default(uuid())
+  code               String   @unique
+  discountPercentage Float
+  expireDate         DateTime
+  maxUsage           Int
+  usageCount         Int      @default(0)
+  createdAt          DateTime @default(now())
+
+  bookings           Booking[]
 }
