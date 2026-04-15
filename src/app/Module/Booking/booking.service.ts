@@ -148,14 +148,17 @@ const createBooking = async (payload: {
         total_amount: Number(finalAmount),
         currency: 'BDT',
         tran_id: transactionId,
-        success_url: `http://localhost:5000/api/bookings/payment/success/${transactionId}`,
-        fail_url: `http://localhost:5000/api/bookings/payment/fail/${transactionId}`,
-        cancel_url: `http://localhost:5000/api/bookings/payment/cancel/${transactionId}`,
-        ipn_url: `http://localhost:5000/api/bookings/payment/ipn`,
+
+        success_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/success/${transactionId}`,
+        fail_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/fail/${transactionId}`,
+        cancel_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/cancel/${transactionId}`,
+        ipn_url: `https://skillbridgebackend.vercel.app/api/bookings/payment/ipn`,
+
         shipping_method: 'No',
         product_name: 'Tutor Session',
         product_category: 'Education',
         product_profile: 'general',
+
         cus_name: 'Student',
         cus_email: 'student@mentorflow.com',
         cus_add1: 'Dhaka',
@@ -163,6 +166,7 @@ const createBooking = async (payload: {
         cus_country: 'Bangladesh',
         cus_phone: '01711111111'
     };
+
 
     const apiResponse = await sslcz.init(data);
 
