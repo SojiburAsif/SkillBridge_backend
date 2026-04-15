@@ -1461,27 +1461,27 @@ var paymentSuccess = async (req, res) => {
   try {
     const tranId = req.params.tranId;
     await bookingServices.processPaymentSuccess(tranId);
-    res.redirect(`http://localhost:3000/payment/success?transactionId=${tranId}`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/success?transactionId=${tranId}`);
   } catch (err) {
-    res.redirect(`http://localhost:3000/payment/fail?reason=${err.message}`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail?reason=${err.message}`);
   }
 };
 var paymentFail = async (req, res) => {
   try {
     const tranId = req.params.tranId;
     await bookingServices.handlePaymentFailOrCancel(tranId);
-    res.redirect(`http://localhost:3000/payment/fail?transactionId=${tranId}`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail?transactionId=${tranId}`);
   } catch (err) {
-    res.redirect(`http://localhost:3000/payment/fail`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail`);
   }
 };
 var paymentCancel = async (req, res) => {
   try {
     const tranId = req.params.tranId;
     await bookingServices.handlePaymentFailOrCancel(tranId);
-    res.redirect(`http://localhost:3000/payment/cancel?transactionId=${tranId}`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/cancel?transactionId=${tranId}`);
   } catch (err) {
-    res.redirect(`http://localhost:3000/payment/cancel`);
+    res.redirect(`https://mentor-flow-fontend.vercel.app/payment/cancel`);
   }
 };
 var paymentIpn = async (req, res) => {
@@ -4157,7 +4157,7 @@ var swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:8000/api"
+        url: "https://skillbridgebackend.vercel.app/api"
       }
     ]
   },
@@ -4166,12 +4166,12 @@ var swaggerOptions = {
 var swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.set("trust proxy", true);
-var allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app", "http://localhost:3000", "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
+var allowedOrigins = ["https://mentor-flow-fontend.vercel.app", "http://localhost:3000", "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || origin === "null") return callback(null, true);
-      const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin);
+      const isAllowed = allowedOrigins.includes(origin) || /^https:\/\/next-blog-client.*\.vercel\.app$/.test(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin) || origin.includes("sslcommerz.com");
       if (isAllowed) {
         callback(null, true);
       } else {

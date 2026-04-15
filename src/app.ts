@@ -34,7 +34,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.set("trust proxy", true)
 
-const allowedOrigins = ["https://skill-bridge-fontend-five.vercel.app", 'http://localhost:3000', "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
+const allowedOrigins = ["https://mentor-flow-fontend.vercel.app", 'http://localhost:3000', "https://next-blog-client.vercel.app", "https://next-blog-client-git-main-rahul-rajput.vercel.app"];
 
 app.use(
     cors({

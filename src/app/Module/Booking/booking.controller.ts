@@ -43,9 +43,9 @@ const paymentSuccess = async (req: Request, res: Response) => {
         await bookingServices.processPaymentSuccess(tranId);
         
         // Redirect to frontend success page
-        res.redirect(`http://localhost:3000/payment/success?transactionId=${tranId}`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/success?transactionId=${tranId}`);
     } catch (err: any) {
-        res.redirect(`http://localhost:3000/payment/fail?reason=${err.message}`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail?reason=${err.message}`);
     }
 };
 
@@ -53,9 +53,9 @@ const paymentFail = async (req: Request, res: Response) => {
     try {
         const tranId = req.params.tranId as string;
         await bookingServices.handlePaymentFailOrCancel(tranId);
-        res.redirect(`http://localhost:3000/payment/fail?transactionId=${tranId}`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail?transactionId=${tranId}`);
     } catch (err: any) {
-        res.redirect(`http://localhost:3000/payment/fail`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/fail`);
     }
 };
 
@@ -63,9 +63,9 @@ const paymentCancel = async (req: Request, res: Response) => {
     try {
         const tranId = req.params.tranId as string;
         await bookingServices.handlePaymentFailOrCancel(tranId);
-        res.redirect(`http://localhost:3000/payment/cancel?transactionId=${tranId}`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/cancel?transactionId=${tranId}`);
     } catch (err: any) {
-        res.redirect(`http://localhost:3000/payment/cancel`);
+        res.redirect(`https://mentor-flow-fontend.vercel.app/payment/cancel`);
     }
 };
 
