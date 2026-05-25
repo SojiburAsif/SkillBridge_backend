@@ -6,16 +6,16 @@ import { ChangePasswordValidationSchema, LoginValidationSchema, RegisterValidati
 
 const router = Router();
 
-// Endpoint: /api/auth-custom/custom-register
+// Endpoint: /api/auth/custom-register
 router.post('/register', validateRequest(RegisterValidationSchema), Register);
 
-// Endpoint: /api/auth-custom/sign-in/email
+// Endpoint: /api/auth/sign-in/email
 router.post('/sign-in/email', validateRequest(LoginValidationSchema), loginUser);
 
-// Endpoint: /api/auth-custom/change-password
+// Endpoint: /api/auth/change-password
 router.post('/change-password', auth(), validateRequest(ChangePasswordValidationSchema), changePassword);
 
-// Endpoint: /api/auth-custom/logout
+// Endpoint: /api/auth/logout
 router.post('/logout', logoutUser);
 
 export const AuthRoutes = router;
